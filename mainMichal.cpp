@@ -218,7 +218,7 @@ void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_
             int first_index = indexes_of_first_cycle[j];
             int second_index = indexes_of_first_cycle[j - 1];
             int node_index = get_index_closest_to_pair(distance_matrix, used_nodes, first_index, second_index);
-            int distance = distance_matrix[first_index][node_index] + distance_matrix[second_index][node_index];
+            int distance = -distance_matrix[first_index][second_index] + distance_matrix[first_index][node_index] + distance_matrix[second_index][node_index];
 
             if (distance < min_distance || best_node_index == -1)
             {
@@ -243,7 +243,7 @@ void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_
             int first_index = indexes_of_second_cycle[j];
             int second_index = indexes_of_second_cycle[j - 1];
             int node_index = get_index_closest_to_pair(distance_matrix, used_nodes, first_index, second_index);
-            int distance = distance_matrix[first_index][node_index] + distance_matrix[second_index][node_index];
+            int distance = -distance_matrix[first_index][second_index] + distance_matrix[first_index][node_index] + distance_matrix[second_index][node_index];
 
             if (distance < min_distance || best_node_index == -1)
             {
