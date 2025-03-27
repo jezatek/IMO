@@ -1,0 +1,3 @@
+g++ mainGlowa.cpp -o mainGlowa
+./mainGlowa
+python3 visualise.py

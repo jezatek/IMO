@@ -1,0 +1,53 @@
+import matplotlib.pyplot as plt
+
+def load_tsp(filename):
+    points = {}
+    with open(filename, "r") as f:
+        start_reading = False
+        for line in f:
+            line = line.strip()
+            if line == "NODE_COORD_SECTION":
+                print("start")
+                start_reading = True
+                continue
+            if line == "EOF":
+                print("eof")
+                break
+            if start_reading:
+                parts = line.split()
+                if len(parts) < 3:
+                    continue
+                parts[0]=int(parts[0])
+                points[parts[0]] = (int(parts[1]), int(parts[2]))
+    return points
+
+
+def load_results(filename):
+    with open(filename, "r") as f:
+        lines = f.readlines()
+    indexes1 = lines[0].split()
+    indexes2 = lines[1].split()
+    return indexes1, indexes2
+
+points = load_tsp("kroA200.tsp")
+indexes1, indexes2 = load_results("trw.txt")
+
+plt.figure(figsize=(10, 10))
+
+# print(points[0])
+print(points[183][0])
+
+for idx in indexes1:
+    plt.scatter(points[int(idx)][0],points[int(idx)][1], color="red")
+for idx in indexes2:
+    plt.scatter(points[int(idx)][0],points[int(idx)][1], color="blue")
+
+for i in range(len(indexes1)):
+    plt.plot([points[int(indexes1[i])][0], points[int(indexes1[(i+1)%len(indexes2)])][0]],
+             [points[int(indexes1[i])][1], points[int(indexes1[(i+1)%len(indexes2)])][1]], color="red")
+
+for i in range(len(indexes2)):
+    plt.plot([points[int(indexes2[i])][0], points[int(indexes2[(i+1)%len(indexes2)])][0]],
+             [points[int(indexes2[i])][1], points[int(indexes2[(i+1)%len(indexes2)])][1]], color="blue")
+
+plt.show()
