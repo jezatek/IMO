@@ -54,10 +54,9 @@ vector<Node> read_coordinates_from_file(const string &filename)
     file.close();
     return nodes;
 }
-
 double euclidean_distance(Node n1, Node n2)
 {
-    return sqrt((n2.x - n1.x) * (n2.x - n1.x) + (n2.y - n1.y) * (n2.y - n1.y));
+    return floor(sqrt((n2.x - n1.x) * (n2.x - n1.x) + (n2.y - n1.y) * (n2.y - n1.y)));
 }
 
 vector<vector<double>> create_distance_matrix(vector<Node> nodes)
@@ -539,7 +538,7 @@ int main()
 {
     // srand(0);
 
-    vector<Node> nodes = read_coordinates_from_file("kroB200.tsp");
+    vector<Node> nodes = read_coordinates_from_file("kroA200.tsp");
     vector<vector<double>> distance_matrix = create_distance_matrix(nodes);
 
     vector<int> bestFirst;
@@ -559,7 +558,7 @@ int main()
     {
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
-        two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        greedy_cycle(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
