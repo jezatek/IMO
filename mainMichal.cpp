@@ -5,6 +5,9 @@
 #include <string>
 #include <cmath>
 #include <random>
+#include <cstdlib>
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 
@@ -179,6 +182,16 @@ int get_index_closest_to_pair(vector<vector<double>> &distance_matrix, vector<bo
 void randomRes(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     int n = distance_matrix.size();
+    vector<int> indexes;
+    for (int i = 0; i < n; i++)
+    {
+        indexes.push_back(i);
+    }
+    shuffle(indexes.begin(), indexes.end(), mt19937(random_device()()));
+    for (int i = 0; i < (n + 1) / 2; i++)
+        indexes_of_first_cycle.push_back(indexes[i]);
+    for (int i = (n + 1) / 2; i < n; i++)
+        indexes_of_second_cycle.push_back(indexes[i]);
 }
 
 void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
@@ -512,6 +525,7 @@ void two_regret_heuristics_with_weights(vector<vector<double>> &distance_matrix,
         i++;
     }
 }
+
 float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     int cs = indexes_of_first_cycle.size();
@@ -527,6 +541,86 @@ float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &ind
         total += distance_matrix[indexes_of_second_cycle[i]][indexes_of_second_cycle[(i + 1) % ss]];
     }
     return total;
+}
+
+void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest)
+{
+    int n = distance_matrix.size();
+    bool improved = true;
+    double best_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+    while (improved)
+    {
+        improved = false;
+        int besti = -1, bestj = -1;
+        double currentBest = best_result;
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = i + 1; j < n; j++)
+            {
+                if (i != j)
+                {
+                    auto i_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), i);
+                    auto j_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), j);
+                    auto i_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), i);
+                    auto j_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), j);
+
+                    if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                        swap(*i_iter_first, *j_iter_first);
+                    else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
+                        swap(*i_iter_first, *j_iter_second);
+                    else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                        swap(*i_iter_second, *j_iter_first);
+                    else
+                        swap(*i_iter_second, *j_iter_second);
+
+                    double new_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+                    if (steepest)
+                    {
+                        if (new_result < currentBest)
+                        {
+                            improved = true;
+                            besti = i;
+                            bestj = j;
+                            currentBest = new_result;
+                        }
+                    }
+                    else
+                    {
+                        if (new_result < best_result)
+                        {
+                            improved = true;
+                            continue;
+                        }
+                    }
+                    if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                        swap(*i_iter_first, *j_iter_first);
+                    else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
+                        swap(*i_iter_first, *j_iter_second);
+                    else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                        swap(*i_iter_second, *j_iter_first);
+                    else
+                        swap(*i_iter_second, *j_iter_second);
+                }
+            }
+        }
+        if (steepest && improved)
+        {
+            auto i_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), besti);
+            auto j_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), bestj);
+            auto i_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), besti);
+            auto j_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), bestj);
+
+            if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                swap(*i_iter_first, *j_iter_first);
+            else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
+                swap(*i_iter_first, *j_iter_second);
+            else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
+                swap(*i_iter_second, *j_iter_first);
+            else
+                swap(*i_iter_second, *j_iter_second);
+            best_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        }
+    }
 }
 
 void saveResults(const string &filename, const vector<int> &first_cycle, const vector<int> &second_cycle, vector<Node> nodes)
@@ -551,6 +645,7 @@ void createInitialResult()
     vector<int> bestFirst;
     vector<int> bestSec;
 
+    // randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
     // nearest_neighbour(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
     // greedy_cycle(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
     // two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
@@ -563,7 +658,9 @@ void createInitialResult()
     {
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
-        greedy_cycle(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // Zmieniasz ponizsze na randomRes / two_regret_heuristics
+        randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -588,7 +685,9 @@ void createInitialResult()
     {
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
-        greedy_cycle(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // Zmieniasz ponizsze na randomRes / two_regret_heuristics
+        randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
