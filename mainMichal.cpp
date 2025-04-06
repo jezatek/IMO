@@ -585,9 +585,9 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
     while (improved)
     {
         ananas++;
-        if (ananas % 100 == 0)
-            cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << endl;
         improved = false;
+        if (ananas % 100 == 0)
+            cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << " " << ananas << " " << improved << endl;
         vector<int>::iterator besti;
         vector<int>::iterator bestj;
         float bestSoFar = 0;
@@ -597,6 +597,8 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
             {
                 if (i != j)
                 {
+                    if (!steepest && improved)
+                        break;
                     auto iIter = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), i);
                     auto jIter = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), j);
                     vector<int> *tab1 = &indexes_of_first_cycle;
@@ -617,9 +619,9 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
                     delta += (distance_matrix[*jIter][*nextIter(iIter, tab1)] + distance_matrix[*jIter][*prevIter(iIter, tab1)]);
                     delta += (distance_matrix[*iIter][*nextIter(jIter, tab2)] + distance_matrix[*iIter][*prevIter(jIter, tab2)]);
                     if (*nextIter(iIter, tab1) == *jIter)
-                        delta += distance_matrix[*iIter][*jIter];
+                        delta += 2 * distance_matrix[*iIter][*jIter];
                     if (*prevIter(iIter, tab1) == *jIter)
-                        delta += distance_matrix[*iIter][*jIter];
+                        delta += 2 * distance_matrix[*iIter][*jIter];
                     if (steepest)
                     {
                         if (delta < bestSoFar)
@@ -635,7 +637,19 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
                         if (delta < 0)
                         {
                             improved = true;
+                            // int a = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
                             swap(*iIter, *jIter);
+                            // if (resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) == a)
+                            // {
+                            //     cout << *iIter << " " << *jIter;
+                            //     cin >> ananas;
+                            // }
+                            // if (ananas % 100 == 0)
+                            // {
+                            //     cout << a << " " << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << endl;
+                            //     cout << *iIter << " co" << *jIter;
+                            // }
+
                             // break;
                             continue;
                         }
