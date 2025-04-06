@@ -194,6 +194,21 @@ void randomRes(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_
         indexes_of_second_cycle.push_back(indexes[i]);
 }
 
+void stupidInit(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
+{
+    int n = distance_matrix.size();
+    vector<int> indexes;
+    for (int i = 0; i < n; i++)
+    {
+        indexes.push_back(i);
+    }
+    // shuffle(indexes.begin(), indexes.end(), mt19937(random_device()()));
+    for (int i = 0; i < (n + 1) / 2; i++)
+        indexes_of_first_cycle.push_back(indexes[i]);
+    for (int i = (n + 1) / 2; i < n; i++)
+        indexes_of_second_cycle.push_back(indexes[i]);
+}
+
 void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     vector<bool> used_nodes(distance_matrix.size(), false);
@@ -543,82 +558,94 @@ float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &ind
     return total;
 }
 
+vector<int>::iterator nextIter(vector<int>::iterator iter, vector<int> *tab)
+{
+    if (iter + 1 == tab->end())
+    {
+        return tab->begin();
+    }
+    else
+        return (iter + 1);
+}
+vector<int>::iterator prevIter(vector<int>::iterator iter, vector<int> *tab)
+{
+    if (iter == tab->begin())
+    {
+        return tab->end() - 1;
+    }
+    else
+        return (iter - 1);
+}
+
 void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest)
 {
     int n = distance_matrix.size();
     bool improved = true;
-    double best_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+    int ananas = 99;
     while (improved)
     {
+        ananas++;
+        if (ananas % 100 == 0)
+            cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << endl;
         improved = false;
-        int besti = -1, bestj = -1;
-        double currentBest = best_result;
+        vector<int>::iterator besti;
+        vector<int>::iterator bestj;
+        float bestSoFar = 0;
         for (int i = 0; i < n; i++)
         {
             for (int j = i + 1; j < n; j++)
             {
                 if (i != j)
                 {
-                    auto i_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), i);
-                    auto j_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), j);
-                    auto i_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), i);
-                    auto j_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), j);
-
-                    if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                        swap(*i_iter_first, *j_iter_first);
-                    else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
-                        swap(*i_iter_first, *j_iter_second);
-                    else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                        swap(*i_iter_second, *j_iter_first);
-                    else
-                        swap(*i_iter_second, *j_iter_second);
-
-                    double new_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+                    auto iIter = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), i);
+                    auto jIter = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), j);
+                    vector<int> *tab1 = &indexes_of_first_cycle;
+                    vector<int> *tab2 = &indexes_of_first_cycle;
+                    if (iIter == indexes_of_first_cycle.end())
+                    {
+                        iIter = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), i);
+                        tab1 = &indexes_of_second_cycle;
+                    }
+                    if (jIter == indexes_of_first_cycle.end())
+                    {
+                        jIter = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), j);
+                        tab2 = &indexes_of_second_cycle;
+                    }
+                    float delta = 0;
+                    delta = -distance_matrix[*iIter][*nextIter(iIter, tab1)] - distance_matrix[*iIter][*prevIter(iIter, tab1)];
+                    delta -= (distance_matrix[*jIter][*nextIter(jIter, tab2)] + distance_matrix[*jIter][*prevIter(jIter, tab2)]);
+                    delta += (distance_matrix[*jIter][*nextIter(iIter, tab1)] + distance_matrix[*jIter][*prevIter(iIter, tab1)]);
+                    delta += (distance_matrix[*iIter][*nextIter(jIter, tab2)] + distance_matrix[*iIter][*prevIter(jIter, tab2)]);
+                    if (*nextIter(iIter, tab1) == *jIter)
+                        delta += distance_matrix[*iIter][*jIter];
+                    if (*prevIter(iIter, tab1) == *jIter)
+                        delta += distance_matrix[*iIter][*jIter];
                     if (steepest)
                     {
-                        if (new_result < currentBest)
+                        if (delta < bestSoFar)
                         {
                             improved = true;
-                            besti = i;
-                            bestj = j;
-                            currentBest = new_result;
+                            besti = iIter;
+                            bestj = jIter;
+                            bestSoFar = delta;
                         }
                     }
                     else
                     {
-                        if (new_result < best_result)
+                        if (delta < 0)
                         {
                             improved = true;
+                            swap(*iIter, *jIter);
+                            // break;
                             continue;
                         }
                     }
-                    if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                        swap(*i_iter_first, *j_iter_first);
-                    else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
-                        swap(*i_iter_first, *j_iter_second);
-                    else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                        swap(*i_iter_second, *j_iter_first);
-                    else
-                        swap(*i_iter_second, *j_iter_second);
                 }
             }
         }
         if (steepest && improved)
         {
-            auto i_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), besti);
-            auto j_iter_first = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), bestj);
-            auto i_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), besti);
-            auto j_iter_second = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), bestj);
-
-            if (i_iter_first != indexes_of_first_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                swap(*i_iter_first, *j_iter_first);
-            else if (i_iter_first != indexes_of_first_cycle.end() && j_iter_second != indexes_of_second_cycle.end())
-                swap(*i_iter_first, *j_iter_second);
-            else if (i_iter_second != indexes_of_second_cycle.end() && j_iter_first != indexes_of_first_cycle.end())
-                swap(*i_iter_second, *j_iter_first);
-            else
-                swap(*i_iter_second, *j_iter_second);
-            best_result = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+            swap(*besti, *bestj);
         }
     }
 }
@@ -635,7 +662,6 @@ void saveResults(const string &filename, const vector<int> &first_cycle, const v
 }
 void createInitialResult()
 {
-    // srand(0);
 
     vector<Node> nodes = read_coordinates_from_file("kroA200.tsp");
     vector<vector<double>> distance_matrix = create_distance_matrix(nodes);
@@ -659,7 +685,7 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        stupidInit(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
@@ -686,7 +712,7 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        stupidInit(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
@@ -705,6 +731,7 @@ void createInitialResult()
 }
 int main()
 {
+    // srand(0);
     createInitialResult();
     return 0;
 }
