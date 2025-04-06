@@ -56,7 +56,7 @@ vector<Node> read_coordinates_from_file(const string &filename)
 }
 double euclidean_distance(Node n1, Node n2)
 {
-    return floor(sqrt((n2.x - n1.x) * (n2.x - n1.x) + (n2.y - n1.y) * (n2.y - n1.y)));
+    return floor(sqrt((n2.x - n1.x) * (n2.x - n1.x) + (n2.y - n1.y) * (n2.y - n1.y)) + 0.5);
 }
 
 vector<vector<double>> create_distance_matrix(vector<Node> nodes)
@@ -174,6 +174,11 @@ int get_index_closest_to_pair(vector<vector<double>> &distance_matrix, vector<bo
         }
     }
     return closest_node_index;
+}
+
+void randomRes(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
+{
+    int n = distance_matrix.size();
 }
 
 void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
@@ -534,12 +539,14 @@ void saveResults(const string &filename, const vector<int> &first_cycle, const v
         out << nodes[second_cycle[i]].id << " ";
     out << "\n";
 }
-int main()
+void createInitialResult()
 {
     // srand(0);
 
     vector<Node> nodes = read_coordinates_from_file("kroA200.tsp");
     vector<vector<double>> distance_matrix = create_distance_matrix(nodes);
+    vector<Node> nodes2 = read_coordinates_from_file("kroB200.tsp");
+    vector<vector<double>> distance_matrix2 = create_distance_matrix(nodes2);
 
     vector<int> bestFirst;
     vector<int> bestSec;
@@ -547,14 +554,12 @@ int main()
     // nearest_neighbour(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
     // greedy_cycle(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
     // two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
-
-    double weight1 = -1;
-    double weight2 = 1;
     // two_regret_heuristics_with_weights(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, weight1, weight2);
+
     int sum = 0;
     int mini = INT32_MAX;
     int maxi = 0;
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
@@ -569,9 +574,38 @@ int main()
         }
         maxi = max(maxi, res);
     }
-    cout << "Mean" << sum / 50.0 << endl;
+    cout << "Mean" << sum / 100.0 << endl;
     cout << "min" << mini << endl;
     cout << "max" << maxi << endl;
     saveResults("trw.txt", bestFirst, bestSec, nodes);
+
+    vector<int> bestFirst2;
+    vector<int> bestSec2;
+    sum = 0;
+    mini = INT32_MAX;
+    maxi = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+        vector<int> indexes_of_first_cycle;
+        vector<int> indexes_of_second_cycle;
+        greedy_cycle(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        sum += res;
+        if (res < mini)
+        {
+            mini = res;
+            bestFirst2 = indexes_of_first_cycle;
+            bestSec2 = indexes_of_second_cycle;
+        }
+        maxi = max(maxi, res);
+    }
+    cout << "Mean" << sum / 100.0 << endl;
+    cout << "min" << mini << endl;
+    cout << "max" << maxi << endl;
+    saveResults("trw2.txt", bestFirst2, bestSec2, nodes2);
+}
+int main()
+{
+    createInitialResult();
     return 0;
 }
