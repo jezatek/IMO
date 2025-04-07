@@ -592,6 +592,87 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
         vector<int>::iterator besti;
         vector<int>::iterator bestj;
         float bestSoFar = 0;
+        vector<pair<int, vector<int> *>> all_elements;
+        for (int i = 0; i < indexes_of_first_cycle.size(); i++)
+            all_elements.emplace_back(i, &indexes_of_first_cycle);
+        for (int i = 0; i < indexes_of_second_cycle.size(); i++)
+            all_elements.emplace_back(i, &indexes_of_second_cycle);
+        vector<pair<pair<int, vector<int> *>, pair<int, vector<int> *>>> pairs;
+        for (int i = 0; i < all_elements.size(); i++)
+            for (int j = i + 1; j < all_elements.size(); j++)
+                pairs.emplace_back(all_elements[i], all_elements[j]);
+        shuffle(pairs.begin(), pairs.end(), mt19937(random_device()()));
+        for (auto &pr : pairs)
+        {
+            vector<int> *tab1 = pr.first.second;
+            vector<int> *tab2 = pr.second.second;
+            auto iIter = tab1->begin() + pr.first.first;
+            auto jIter = tab2->begin() + pr.second.first;
+            float delta = 0;
+            delta = -distance_matrix[*iIter][*nextIter(iIter, tab1)] - distance_matrix[*iIter][*prevIter(iIter, tab1)];
+            delta -= (distance_matrix[*jIter][*nextIter(jIter, tab2)] + distance_matrix[*jIter][*prevIter(jIter, tab2)]);
+            delta += (distance_matrix[*jIter][*nextIter(iIter, tab1)] + distance_matrix[*jIter][*prevIter(iIter, tab1)]);
+            delta += (distance_matrix[*iIter][*nextIter(jIter, tab2)] + distance_matrix[*iIter][*prevIter(jIter, tab2)]);
+            if (*nextIter(iIter, tab1) == *jIter)
+                delta += 2 * distance_matrix[*iIter][*jIter];
+            if (*prevIter(iIter, tab1) == *jIter)
+                delta += 2 * distance_matrix[*iIter][*jIter];
+            if (steepest)
+            {
+                if (delta < bestSoFar)
+                {
+                    improved = true;
+                    besti = iIter;
+                    bestj = jIter;
+                    bestSoFar = delta;
+                }
+            }
+            else
+            {
+                if (delta < 0)
+                {
+                    improved = true;
+                    // int a = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+                    swap(*iIter, *jIter);
+                    // if (resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) == a)
+                    // {
+                    //     cout << *iIter << " " << *jIter;
+                    //     cin >> ananas;
+                    // }
+                    // if (ananas % 100 == 0)
+                    // {
+                    //     cout << a << " " << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << endl;
+                    //     cout << *iIter << " co" << *jIter;
+                    // }
+
+                    break;
+                    // continue;
+                }
+            }
+        }
+        if (steepest && improved)
+        {
+            swap(*besti, *bestj);
+        }
+    }
+}
+
+void changeEdge(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest)
+{
+    int n = distance_matrix.size();
+    bool improved = true;
+    // int ananas = 99;
+    while (improved)
+    {
+        // ananas++;
+        improved = false;
+        // if (ananas % 100 == 0)
+        //     cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << " " << ananas << " " << improved << endl;
+        /*if (ananas == 200)
+            break;*/
+        vector<int>::iterator besti;
+        vector<int>::iterator bestj;
+        float bestSoFar = 0;
         for (int i = 0; i < n; i++)
         {
             for (int j = i + 1; j < n; j++)
@@ -614,15 +695,18 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
                         jIter = find(indexes_of_second_cycle.begin(), indexes_of_second_cycle.end(), j);
                         tab2 = &indexes_of_second_cycle;
                     }
+
+                    if (tab1 != tab2)
+                        continue;
+
                     float delta = 0;
-                    delta = -distance_matrix[*iIter][*nextIter(iIter, tab1)] - distance_matrix[*iIter][*prevIter(iIter, tab1)];
-                    delta -= (distance_matrix[*jIter][*nextIter(jIter, tab2)] + distance_matrix[*jIter][*prevIter(jIter, tab2)]);
-                    delta += (distance_matrix[*jIter][*nextIter(iIter, tab1)] + distance_matrix[*jIter][*prevIter(iIter, tab1)]);
-                    delta += (distance_matrix[*iIter][*nextIter(jIter, tab2)] + distance_matrix[*iIter][*prevIter(jIter, tab2)]);
-                    if (*nextIter(iIter, tab1) == *jIter)
-                        delta += 2 * distance_matrix[*iIter][*jIter];
-                    if (*prevIter(iIter, tab1) == *jIter)
-                        delta += 2 * distance_matrix[*iIter][*jIter];
+                    delta -= distance_matrix[*iIter][*nextIter(iIter, tab1)];
+                    delta -= distance_matrix[*jIter][*nextIter(jIter, tab2)];
+                    delta += distance_matrix[*iIter][*jIter];
+                    delta += distance_matrix[*nextIter(iIter, tab1)][*nextIter(jIter, tab2)];
+                    // cout << "i: " << i << endl;
+                    // cout << "j: " << j << endl;
+                    // cout << "delta: " << delta << endl;
                     if (steepest)
                     {
                         if (delta < bestSoFar)
@@ -638,20 +722,15 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
                         if (delta < 0)
                         {
                             improved = true;
-                            // int a = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
-                            swap(*iIter, *jIter);
-                            // if (resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) == a)
-                            // {
-                            //     cout << *iIter << " " << *jIter;
-                            //     cin >> ananas;
-                            // }
-                            // if (ananas % 100 == 0)
-                            // {
-                            //     cout << a << " " << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << endl;
-                            //     cout << *iIter << " co" << *jIter;
-                            // }
 
-                            // break;
+                            // cout << "tutaj1" << endl;
+                            // printVector(*tab1);
+                            if (iIter < jIter)
+                                reverse(nextIter(iIter, tab1), jIter + 1);
+                            else
+                                reverse(nextIter(jIter, tab1), iIter + 1);
+                            // printVector(*tab1);
+
                             continue;
                         }
                     }
@@ -660,7 +739,27 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
         }
         if (steepest && improved)
         {
-            swap(*besti, *bestj);
+            auto found = find(indexes_of_first_cycle.begin(), indexes_of_first_cycle.end(), *besti);
+            if (found != indexes_of_first_cycle.end())
+            {
+                // cout << "tutaj2" << endl;
+                // printVector(indexes_of_first_cycle);
+                if (besti < bestj)
+                    reverse(nextIter(besti, &indexes_of_first_cycle), bestj + 1);
+                else
+                    reverse(nextIter(bestj, &indexes_of_first_cycle), besti + 1);
+                // printVector(indexes_of_first_cycle);
+            }
+            else
+            {
+                // cout << "tutaj3" << endl;
+                // printVector(indexes_of_second_cycle);
+                if (besti < bestj)
+                    reverse(nextIter(besti, &indexes_of_second_cycle), bestj + 1);
+                else
+                    reverse(nextIter(bestj, &indexes_of_second_cycle), besti + 1);
+                // printVector(indexes_of_second_cycle);
+            }
         }
     }
 }
@@ -702,8 +801,9 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
+        // changeEdge(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -739,8 +839,9 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
-        changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
+        two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
+        changeEdge(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
