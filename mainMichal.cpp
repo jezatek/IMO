@@ -8,7 +8,8 @@
 #include <cstdlib>
 #include <algorithm>
 #include <iterator>
-
+#include <chrono>
+#define nrOfTrials 100
 using namespace std;
 
 struct Node
@@ -581,13 +582,13 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
 {
     int n = distance_matrix.size();
     bool improved = true;
-    int ananas = 99;
+    // int ananas = 99;
     while (improved)
     {
-        ananas++;
+        // ananas++;
         improved = false;
-        if (ananas % 100 == 0)
-            cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << " " << ananas << " " << improved << endl;
+        // if (ananas % 100 == 0)
+        // cout << resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle) << " " << ananas << " " << improved << endl;
         vector<int>::iterator besti;
         vector<int>::iterator bestj;
         float bestSoFar = 0;
@@ -694,12 +695,14 @@ void createInitialResult()
     int sum = 0;
     int mini = INT32_MAX;
     int maxi = 0;
-    for (int i = 0; i < 100; ++i)
+    vector<long long> durations;
+    for (int i = 0; i < nrOfTrials; ++i)
     {
+        auto start = chrono::high_resolution_clock::now();
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        stupidInit(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
@@ -710,23 +713,33 @@ void createInitialResult()
             bestSec = indexes_of_second_cycle;
         }
         maxi = max(maxi, res);
+        durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
+        if (i % 10 == 0)
+            cout
+                << "Progres:" << i << endl;
     }
-    cout << "Mean" << sum / 100.0 << endl;
+    cout << "Mean" << sum / (nrOfTrials + 0.0) << endl;
     cout << "min" << mini << endl;
     cout << "max" << maxi << endl;
     saveResults("trw.txt", bestFirst, bestSec, nodes);
 
+    cout << "MinTime" << *min_element(durations.begin(), durations.end()) << endl;
+    cout << "MaxTime" << *max_element(durations.begin(), durations.end()) << endl;
+    cout << "MeanTime" << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
+
+    durations.clear();
     vector<int> bestFirst2;
     vector<int> bestSec2;
     sum = 0;
     mini = INT32_MAX;
     maxi = 0;
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < nrOfTrials; ++i)
     {
+        auto start = chrono::high_resolution_clock::now();
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        stupidInit(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
@@ -737,11 +750,18 @@ void createInitialResult()
             bestSec2 = indexes_of_second_cycle;
         }
         maxi = max(maxi, res);
+        durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
+        if (i % 10 == 0)
+            cout << "Progres:" << i << endl;
     }
-    cout << "Mean" << sum / 100.0 << endl;
+    cout << "Mean" << sum / (nrOfTrials + 0.0) << endl;
     cout << "min" << mini << endl;
     cout << "max" << maxi << endl;
     saveResults("trw2.txt", bestFirst2, bestSec2, nodes2);
+
+    cout << "MinTime" << *min_element(durations.begin(), durations.end()) << endl;
+    cout << "MaxTime" << *max_element(durations.begin(), durations.end()) << endl;
+    cout << "MeanTime" << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
 }
 int main()
 {
