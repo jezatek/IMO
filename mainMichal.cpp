@@ -15,7 +15,7 @@
 #include "lab3.h"
 #include "lab4.h"
 
-#define nrOfTrials 2
+#define nrOfTrials 10
 using namespace std;
 
 struct Node
@@ -123,8 +123,13 @@ void createInitialResult()
     // two_regret_heuristics_with_weights(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, weight1, weight2);
 
     int sum = 0;
-    int mini = INT32_MAX;
+    int mini = INT32_MAX - 500;
     int maxi = 0;
+    int iterations = 0;
+    int itsum = 0;
+    int itmini = INT32_MAX - 500;
+    int itmaxi = 0;
+
     vector<long long> durations;
     for (int i = 0; i < nrOfTrials; ++i)
     {
@@ -140,8 +145,8 @@ void createInitialResult()
         // changeEdgeCandidates(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
         // randomChange(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
         // MSLS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
-        // ILS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14627500);
-        LNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14627500, true);
+        ILS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations);
+        // LNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, true);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -151,6 +156,9 @@ void createInitialResult()
             bestSec = indexes_of_second_cycle;
         }
         maxi = max(maxi, res);
+        itsum += iterations;
+        itmaxi = max(itmaxi, iterations);
+        itmini = min(itmini, iterations);
         durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
         if (i % nrOfTrials / 10 == 0)
             cout
@@ -159,11 +167,14 @@ void createInitialResult()
     cout << "Mean " << sum / (nrOfTrials + 0.0) << endl;
     cout << "min " << mini << endl;
     cout << "max " << maxi << endl;
+    cout << "Meanit " << itsum / (nrOfTrials + 0.0) << endl;
+    cout << "minit " << itmini << endl;
+    cout << "maxit " << itmaxi << endl;
     saveResults("trw.txt", bestFirst, bestSec, nodes);
 
+    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
     cout << "MinTime " << *min_element(durations.begin(), durations.end()) << endl;
     cout << "MaxTime " << *max_element(durations.begin(), durations.end()) << endl;
-    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
 
     durations.clear();
     vector<int> bestFirst2;
@@ -171,6 +182,9 @@ void createInitialResult()
     sum = 0;
     mini = INT32_MAX;
     maxi = 0;
+    itsum = 0;
+    itmini = INT32_MAX - 500;
+    itmaxi = 0;
     for (int i = 0; i < nrOfTrials; ++i)
     {
         auto start = chrono::high_resolution_clock::now();
@@ -185,8 +199,8 @@ void createInitialResult()
         // changeEdgeCandidates(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
         // randomChange(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
         // MSLS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
-        // ILS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 15519000);
-        LNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 15519000, true);
+        ILS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations);
+        // LNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, true);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -196,6 +210,9 @@ void createInitialResult()
             bestSec2 = indexes_of_second_cycle;
         }
         maxi = max(maxi, res);
+        itsum += iterations;
+        itmaxi = max(itmaxi, iterations);
+        itmini = min(itmini, iterations);
         durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
         if (i % nrOfTrials / 10 == 0)
             cout << "Progres:" << i << endl;
@@ -203,11 +220,14 @@ void createInitialResult()
     cout << "Mean " << sum / (nrOfTrials + 0.0) << endl;
     cout << "min " << mini << endl;
     cout << "max " << maxi << endl;
+    cout << "Meanit " << itsum / (nrOfTrials + 0.0) << endl;
+    cout << "minit " << itmini << endl;
+    cout << "maxit " << itmaxi << endl;
     saveResults("trw2.txt", bestFirst2, bestSec2, nodes2);
 
+    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
     cout << "MinTime " << *min_element(durations.begin(), durations.end()) << endl;
     cout << "MaxTime " << *max_element(durations.begin(), durations.end()) << endl;
-    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
 }
 int main()
 {

@@ -40,7 +40,7 @@ float MSLS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_firs
             indexes_of_second_cycle = pom_indexes_of_second_cycle;
         }
     }
-    cout << best_result << endl;
+    // cout << best_result << endl;
     return best_result;
 }
 
@@ -91,7 +91,7 @@ void randomLocalChangeIter(vector<vector<double>> &distance_matrix, vector<int> 
 /// @param distance_matrix n*n array of distances between points
 /// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
 /// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
-float ILS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, long long time)
+float ILS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, long long time, int &iterations, int nrPerturbations = 15)
 {
     vector<int> pom_indexes_of_first_cycle;
     vector<int> pom_indexes_of_second_cycle;
@@ -101,13 +101,14 @@ float ILS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first
     float best_result = resultFromCycles(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle);
     indexes_of_first_cycle = pom_indexes_of_first_cycle;
     indexes_of_second_cycle = pom_indexes_of_second_cycle;
-
+    iterations = 0;
     auto start = chrono::steady_clock::now();
     while (chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now() - start).count() < time)
     {
+        iterations++;
         pom_indexes_of_first_cycle = indexes_of_first_cycle;
         pom_indexes_of_second_cycle = indexes_of_second_cycle;
-        randomLocalChangeIter(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle, 5);
+        randomLocalChangeIter(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle, nrPerturbations);
         changeEdgeMemory(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle);
         float result = resultFromCycles(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle);
         // cout << "best_result: " << best_result <<endl;
@@ -145,7 +146,7 @@ void shreadCycle(vector<int> &cycle, int procent)
 /// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
 /// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
 /// @param LS Using Local Search each iteration
-float LNS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, long long time, bool LS = true)
+float LNS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, long long time, int &iterations, bool LS = true)
 {
     vector<int> pom_indexes_of_first_cycle;
     vector<int> pom_indexes_of_second_cycle;
@@ -155,11 +156,11 @@ float LNS(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first
     float best_result = resultFromCycles(distance_matrix, pom_indexes_of_first_cycle, pom_indexes_of_second_cycle);
     indexes_of_first_cycle = pom_indexes_of_first_cycle;
     indexes_of_second_cycle = pom_indexes_of_second_cycle;
-    int iter = 0;
+    iterations = 0;
     auto start = chrono::steady_clock::now();
     while (chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now() - start).count() < time)
     {
-        iter++;
+        iterations++;
         pom_indexes_of_first_cycle = indexes_of_first_cycle;
         pom_indexes_of_second_cycle = indexes_of_second_cycle;
         shreadCycle(pom_indexes_of_first_cycle, 30);

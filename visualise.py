@@ -92,5 +92,5 @@ for i in range(len(indexes2)):
     axs[1].plot([points[int(indexes2[i])][0], points[int(indexes2[(i+1)%len(indexes2)])][0]],
              [points[int(indexes2[i])][1], points[int(indexes2[(i+1)%len(indexes2)])][1]], color="blue")
 
-fig.suptitle("Candidates, k=10")
+fig.suptitle("LNS + LS")
 plt.show()
