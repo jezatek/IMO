@@ -276,28 +276,50 @@ double lowestCost(vector<vector<double>> &distance_matrix, vector<int> &indexes_
 /// @param distance_matrix n*n array of distances between points
 /// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
 /// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
-void two_regret_heuristics(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, float w1 = 1, float w2 = 1)
+void two_regret_heuristics(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool begin = true)
 {
+    // bool DEBBUG = false;
+    // if (indexes_of_first_cycle[0] == 1 && indexes_of_first_cycle[30] == 131 && indexes_of_first_cycle[60] == 178 &&
+    //     indexes_of_second_cycle[0] == 153 && indexes_of_second_cycle[30] == 77 && indexes_of_second_cycle[60] == 175 &&
+    //     indexes_of_second_cycle[15] == 95 && indexes_of_second_cycle[45] == 116 && indexes_of_second_cycle[69] == 139)
+    //     DEBBUG = true;
     vector<bool> used_nodes(distance_matrix.size(), false);
     int first_cycle_full_size = distance_matrix.size() - distance_matrix.size() / 2;
     int second_cycle_full_size = distance_matrix.size() / 2;
-    int first_node_index = get_random_number(0, distance_matrix.size() - 1);
-    indexes_of_first_cycle.push_back(first_node_index);
-    used_nodes[first_node_index] = true;
-
-    int furthest_node_index = get_index_of_furthest_node(distance_matrix, used_nodes, first_node_index);
-    indexes_of_second_cycle.push_back(furthest_node_index);
-    used_nodes[furthest_node_index] = true;
-
-    int first_node_pair_index = get_index_of_closest_node(distance_matrix, used_nodes, first_node_index);
-    indexes_of_first_cycle.push_back(first_node_pair_index);
-    used_nodes[first_node_pair_index] = true;
-
-    int furthest_node_pair_index = get_index_of_closest_node(distance_matrix, used_nodes, furthest_node_index);
-    indexes_of_second_cycle.push_back(furthest_node_pair_index);
-    used_nodes[furthest_node_pair_index] = true;
-
     int i = 4;
+    if (begin)
+    {
+        int first_node_index = get_random_number(0, distance_matrix.size() - 1);
+        indexes_of_first_cycle.push_back(first_node_index);
+        used_nodes[first_node_index] = true;
+
+        int furthest_node_index = get_index_of_furthest_node(distance_matrix, used_nodes, first_node_index);
+        indexes_of_second_cycle.push_back(furthest_node_index);
+        used_nodes[furthest_node_index] = true;
+
+        int first_node_pair_index = get_index_of_closest_node(distance_matrix, used_nodes, first_node_index);
+        indexes_of_first_cycle.push_back(first_node_pair_index);
+        used_nodes[first_node_pair_index] = true;
+
+        int furthest_node_pair_index = get_index_of_closest_node(distance_matrix, used_nodes, furthest_node_index);
+        indexes_of_second_cycle.push_back(furthest_node_pair_index);
+        used_nodes[furthest_node_pair_index] = true;
+        i = 4;
+    }
+    else
+    {
+        i = 0;
+        for (int y = 0; y < indexes_of_first_cycle.size(); y++)
+        {
+            used_nodes[indexes_of_first_cycle[y]] = true;
+            i++;
+        }
+        for (int y = 0; y < indexes_of_second_cycle.size(); y++)
+        {
+            used_nodes[indexes_of_second_cycle[y]] = true;
+            i++;
+        }
+    }
     // są już dodane 2 elementy do first cycle i 2 do second cycle
     int best_insert_index;
     int best_node_index;
@@ -319,15 +341,15 @@ void two_regret_heuristics(vector<vector<double>> &distance_matrix, vector<int> 
             {
                 int insertion_index1;
                 int insertion_index2;
-                int regret = INT32_MAX;
-                int regret2 = INT32_MAX;
+                int regret = INT32_MAX - 500;
+                int regret2 = INT32_MAX - 500;
                 if (indexes_of_first_cycle.size() < first_cycle_full_size)
                 {
-                    regret = w1 * lowestCost(distance_matrix, indexes_of_first_cycle, j, insertion_index1);
+                    regret = lowestCost(distance_matrix, indexes_of_first_cycle, j, insertion_index1);
                 }
                 if (indexes_of_second_cycle.size() < second_cycle_full_size)
                 {
-                    regret2 = w2 * lowestCost(distance_matrix, indexes_of_second_cycle, j, insertion_index2);
+                    regret2 = lowestCost(distance_matrix, indexes_of_second_cycle, j, insertion_index2);
                 }
                 int func = abs(regret - regret2);
                 if (func > max_regret)

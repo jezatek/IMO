@@ -138,8 +138,10 @@ void createInitialResult()
         // changeEdge(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true);
         // changeEdgeMemory(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeEdgeCandidates(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
-        // randomChange(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
+        // randomChange(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
         // MSLS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // ILS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14627500);
+        LNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14627500, true);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -159,9 +161,9 @@ void createInitialResult()
     cout << "max " << maxi << endl;
     saveResults("trw.txt", bestFirst, bestSec, nodes);
 
-    cout << "MinTime" << *min_element(durations.begin(), durations.end()) << endl;
-    cout << "MaxTime" << *max_element(durations.begin(), durations.end()) << endl;
-    cout << "MeanTime" << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
+    cout << "MinTime " << *min_element(durations.begin(), durations.end()) << endl;
+    cout << "MaxTime " << *max_element(durations.begin(), durations.end()) << endl;
+    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
 
     durations.clear();
     vector<int> bestFirst2;
@@ -183,6 +185,8 @@ void createInitialResult()
         // changeEdgeCandidates(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
         // randomChange(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
         // MSLS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // ILS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 15519000);
+        LNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 15519000, true);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -201,13 +205,13 @@ void createInitialResult()
     cout << "max " << maxi << endl;
     saveResults("trw2.txt", bestFirst2, bestSec2, nodes2);
 
-    cout << "MinTime" << *min_element(durations.begin(), durations.end()) << endl;
-    cout << "MaxTime" << *max_element(durations.begin(), durations.end()) << endl;
-    cout << "MeanTime" << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
+    cout << "MinTime " << *min_element(durations.begin(), durations.end()) << endl;
+    cout << "MaxTime " << *max_element(durations.begin(), durations.end()) << endl;
+    cout << "MeanTime " << accumulate(durations.begin(), durations.end(), 0LL) / (nrOfTrials + 0.0) << endl;
 }
 int main()
 {
-    // srand(0);
+    srand(3);
     createInitialResult();
     return 0;
 }

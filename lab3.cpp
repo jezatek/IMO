@@ -173,18 +173,30 @@ void changeEdgeMemory(vector<vector<double>> &distance_matrix, vector<int> &inde
 
             if ((ok1 && ok3) || (ok2 && ok4))
             {
-                if (recalcDelta(iIter, jIter, *m.tab1, *m.tab2, distance_matrix) >= 0)
+                vector<int>::iterator firstIt;
+                vector<int>::iterator secondIt;
+                if (ok1 && ok3)
+                {
+                    firstIt = iIter;
+                    secondIt = jIter;
+                }
+                else
+                {
+                    firstIt = prevIter(iIter, m.tab1);
+                    secondIt = prevIter(jIter, m.tab2);
+                }
+                if (recalcDelta(firstIt, secondIt, *m.tab1, *m.tab2, distance_matrix) >= 0)
                     continue;
 
-                if (iIter < jIter)
-                    reverse(nextIter(iIter, m.tab1), jIter + 1);
+                if (firstIt < secondIt)
+                    reverse(nextIter(firstIt, m.tab1), secondIt + 1);
                 else
-                    reverse(nextIter(jIter, m.tab1), iIter + 1);
+                    reverse(nextIter(secondIt, m.tab1), firstIt + 1);
 
                 improved = true;
                 fillLM(LM, delayedLM);
-                updateLM(els, iIter, m.tab1, LM, distance_matrix);
-                updateLM(els, jIter, m.tab2, LM, distance_matrix);
+                updateLM(els, firstIt, m.tab1, LM, distance_matrix);
+                updateLM(els, secondIt, m.tab2, LM, distance_matrix);
             }
             else if ((ok1 && ok4) || (ok2 && ok3))
             {
