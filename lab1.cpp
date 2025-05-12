@@ -99,6 +99,26 @@ int get_index_closest_to_pair(vector<vector<double>> &distance_matrix, vector<bo
     return closest_node_index;
 }
 
+float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
+{
+    int cs = indexes_of_first_cycle.size();
+    int ss = indexes_of_second_cycle.size();
+    // cout << cs << " " << ss << endl;
+    int total = 0;
+    for (int i = 0; i < cs; i++)
+    {
+        total += distance_matrix[indexes_of_first_cycle[i]][indexes_of_first_cycle[(i + 1) % cs]];
+    }
+    for (int i = 0; i < ss; i++)
+    {
+        total += distance_matrix[indexes_of_second_cycle[i]][indexes_of_second_cycle[(i + 1) % ss]];
+    }
+    return total;
+}
+/// @brief Generates random result
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
 void randomRes(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     int n = distance_matrix.size();
@@ -107,7 +127,7 @@ void randomRes(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_
     {
         indexes.push_back(i);
     }
-    shuffle(indexes.begin(), indexes.end(), mt19937(random_device()()));
+    random_shuffle(indexes.begin(), indexes.end());
     for (int i = 0; i < (n + 1) / 2; i++)
         indexes_of_first_cycle.push_back(indexes[i]);
     for (int i = (n + 1) / 2; i < n; i++)
@@ -129,6 +149,10 @@ void stupidInit(vector<vector<double>> &distance_matrix, vector<int> &indexes_of
         indexes_of_second_cycle.push_back(indexes[i]);
 }
 
+/// @brief Generates greedy result
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
 void greedy_cycle(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     vector<bool> used_nodes(distance_matrix.size(), false);
@@ -248,6 +272,10 @@ double lowestCost(vector<vector<double>> &distance_matrix, vector<int> &indexes_
     return lowest_cost;
 }
 
+/// @brief Generates 2-regret result
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
 void two_regret_heuristics(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, float w1 = 1, float w2 = 1)
 {
     vector<bool> used_nodes(distance_matrix.size(), false);

@@ -13,8 +13,9 @@
 #include "lab1.h"
 #include "lab2.h"
 #include "lab3.h"
+#include "lab4.h"
 
-#define nrOfTrials 100
+#define nrOfTrials 2
 using namespace std;
 
 struct Node
@@ -94,23 +95,6 @@ vector<vector<double>> create_distance_matrix(vector<Node> nodes)
 //     return distribution(generator);
 // }
 
-float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
-{
-    int cs = indexes_of_first_cycle.size();
-    int ss = indexes_of_second_cycle.size();
-    // cout << cs << " " << ss << endl;
-    int total = 0;
-    for (int i = 0; i < cs; i++)
-    {
-        total += distance_matrix[indexes_of_first_cycle[i]][indexes_of_first_cycle[(i + 1) % cs]];
-    }
-    for (int i = 0; i < ss; i++)
-    {
-        total += distance_matrix[indexes_of_second_cycle[i]][indexes_of_second_cycle[(i + 1) % ss]];
-    }
-    return total;
-}
-
 void saveResults(const string &filename, const vector<int> &first_cycle, const vector<int> &second_cycle, vector<Node> nodes)
 {
     ofstream out(filename);
@@ -148,12 +132,14 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true);
-        changeEdgeMemory(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // changeEdgeMemory(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // changeEdgeCandidates(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
         // randomChange(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
+        // MSLS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -164,7 +150,7 @@ void createInitialResult()
         }
         maxi = max(maxi, res);
         durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
-        if (i % 10 == 0)
+        if (i % nrOfTrials / 10 == 0)
             cout
                 << "Progres:" << i << endl;
     }
@@ -189,12 +175,14 @@ void createInitialResult()
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
-        randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         // two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true);
-        changeEdgeMemory(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // changeEdgeMemory(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // changeEdgeCandidates(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true, 10);
         // randomChange(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 385400);
+        // MSLS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -205,7 +193,7 @@ void createInitialResult()
         }
         maxi = max(maxi, res);
         durations.push_back(chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count() / 1000);
-        if (i % 10 == 0)
+        if (i % nrOfTrials / 10 == 0)
             cout << "Progres:" << i << endl;
     }
     cout << "Mean " << sum / (nrOfTrials + 0.0) << endl;

@@ -31,6 +31,10 @@ vector<int>::iterator prevIter(vector<int>::iterator iter, vector<int> *tab)
         return (iter - 1);
 }
 
+/// @brief Performs changing of the vetexes
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be filled at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be filled at start
 void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest)
 {
     int n = distance_matrix.size();
@@ -110,6 +114,10 @@ void changeWierzholek(vector<vector<double>> &distance_matrix, vector<int> &inde
     }
 }
 
+/// @brief Performs changing of the edges
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be filled at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be filled at start
 void changeEdge(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest)
 {
     int n = distance_matrix.size();

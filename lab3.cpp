@@ -9,6 +9,7 @@
 #include <iterator>
 #include <chrono>
 #include <set>
+#include <unordered_map>
 
 #include "lab1.h"
 #include "lab2.h"
@@ -111,6 +112,11 @@ void fillLM(multiset<Move> &LM, multiset<Move> &dLM)
     }
     dLM.clear();
 }
+
+/// @brief Performs changing of the edges with memory to reduce time
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be filled at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be filled at start
 void changeEdgeMemory(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     vector<pair<int, vector<int> *>> els;
@@ -193,7 +199,7 @@ void changeEdgeMemory(vector<vector<double>> &distance_matrix, vector<int> &inde
             bool cond3 = (nj == m.next_j && pj == m.prev_j);
             bool cond4 = (pj == m.next_j && nj == m.prev_j);
 
-            if ((cond1 && cond3) || (cond2 && cond4))
+            if ((cond1 || cond2) && (cond3 || cond4))
             {
                 if (recalcDelta(iIter, jIter, *m.tab1, *m.tab2, distance_matrix) >= 0)
                     continue;
@@ -209,4 +215,169 @@ void changeEdgeMemory(vector<vector<double>> &distance_matrix, vector<int> &inde
         }
     }
     // cout << "ananans" << ananas;
+}
+
+/// @brief Performs changing of the edges with NN
+/// @param distance_matrix n*n array of distances between points
+/// @param indexes_of_first_cycle Result first cycle -> needs to be filled at start
+/// @param indexes_of_second_cycle Result second cycle -> needs to be filled at start
+void changeEdgeCandidates(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool steepest, int numNN = 10)
+{
+    int n = distance_matrix.size();
+
+    vector<vector<int>> candidates(n);
+    for (int i = 0; i < n; i++)
+    {
+        vector<pair<double, int>> dists;
+        for (int j = 0; j < n; j++)
+        {
+            if (i != j)
+                dists.emplace_back(distance_matrix[i][j], j);
+        }
+        sort(dists.begin(), dists.end());
+        for (int k = 0; k < numNN; k++)
+            candidates[i].push_back(dists[k].second);
+    }
+
+    bool improved = true;
+    while (improved)
+    {
+        improved = false;
+
+        unordered_map<int, pair<vector<int> *, vector<int>::iterator>> point_map;
+        for (auto it = indexes_of_first_cycle.begin(); it != indexes_of_first_cycle.end(); ++it)
+            point_map[*it] = {&indexes_of_first_cycle, it};
+        for (auto it = indexes_of_second_cycle.begin(); it != indexes_of_second_cycle.end(); ++it)
+            point_map[*it] = {&indexes_of_second_cycle, it};
+
+        float bestSoFar = 0;
+        vector<int>::iterator besti, bestj;
+        vector<int> *bestTab1 = nullptr, *bestTab2 = nullptr;
+
+        for (auto &[p, info1] : point_map)
+        {
+            auto &[tab1, iIter] = info1;
+            for (int q : candidates[p])
+            {
+                if (point_map.find(q) == point_map.end())
+                    continue;
+
+                auto &[tab2, jIter] = point_map[q];
+
+                if (tab1 == tab2)
+                {
+                    auto pi = prevIter(iIter, tab1);
+                    auto pj = prevIter(jIter, tab2);
+                    float delta1 = recalcDelta(iIter, jIter, *tab1, *tab2, distance_matrix);
+                    float delta2 = recalcDelta(pi, pj, *tab1, *tab2, distance_matrix);
+
+                    if (steepest)
+                    {
+                        if (delta1 < bestSoFar)
+                        {
+                            improved = true;
+                            besti = iIter;
+                            bestj = jIter;
+                            bestTab1 = tab1;
+                            bestTab2 = tab2;
+                            bestSoFar = delta1;
+                        }
+                        if (delta2 < bestSoFar)
+                        {
+                            improved = true;
+                            besti = prevIter(iIter, tab1);
+                            bestj = prevIter(jIter, tab2);
+                            bestTab1 = tab1;
+                            bestTab2 = tab2;
+                            bestSoFar = delta2;
+                        }
+                    }
+                    else
+                    {
+                        if (delta1 < 0)
+                        {
+                            improved = true;
+                            if (iIter < jIter)
+                                reverse(nextIter(iIter, tab1), jIter + 1);
+                            else
+                                reverse(nextIter(jIter, tab1), iIter + 1);
+                            break;
+                        }
+                        if (delta2 < 0)
+                        {
+                            improved = true;
+                            auto piIter = prevIter(iIter, tab1);
+                            auto pjIter = prevIter(jIter, tab2);
+                            if (piIter < pjIter)
+                                reverse(nextIter(piIter, tab1), pjIter + 1);
+                            else
+                                reverse(nextIter(pjIter, tab1), piIter + 1);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    auto ni = nextIter(iIter, tab1);
+                    auto pj = prevIter(jIter, tab2);
+                    float delta1 = recalcDelta(pj, iIter, *tab2, *tab1, distance_matrix);
+                    float delta2 = recalcDelta(ni, jIter, *tab1, *tab2, distance_matrix);
+
+                    if (steepest)
+                    {
+                        if (delta1 < bestSoFar)
+                        {
+                            improved = true;
+                            besti = prevIter(jIter, tab2);
+                            bestj = iIter;
+                            bestTab1 = tab2;
+                            bestTab2 = tab1;
+                            bestSoFar = delta1;
+                        }
+                        if (delta2 < bestSoFar)
+                        {
+                            improved = true;
+                            besti = nextIter(iIter, tab1);
+                            bestj = jIter;
+                            bestTab1 = tab1;
+                            bestTab2 = tab2;
+                            bestSoFar = delta2;
+                        }
+                    }
+                    else
+                    {
+                        if (delta1 < 0)
+                        {
+                            improved = true;
+                            swap(*prevIter(jIter, tab2), *iIter);
+                            break;
+                        }
+                        if (delta2 < 0)
+                        {
+                            improved = true;
+                            swap(*nextIter(iIter, tab1), *jIter);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (improved && !steepest)
+                break;
+        }
+
+        if (improved && steepest)
+        {
+            if (bestTab1 == bestTab2)
+            {
+                if (besti < bestj)
+                    reverse(nextIter(besti, bestTab1), bestj + 1);
+                else
+                    reverse(nextIter(bestj, bestTab1), besti + 1);
+            }
+            else
+            {
+                swap(*besti, *bestj);
+            }
+        }
+    }
 }
