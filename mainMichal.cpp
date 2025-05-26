@@ -138,7 +138,7 @@ void createInitialResult()
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
         // randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
-        // two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true);
         // changeEdgeMemory(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
@@ -147,7 +147,7 @@ void createInitialResult()
         // MSLS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // ILS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations);
         // LNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, true);
-        HAE(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 1440000, iterations, true);
+        // HAE(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, false);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -193,7 +193,7 @@ void createInitialResult()
         vector<int> indexes_of_second_cycle;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
         // randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
-        // two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true);
         // changeEdgeMemory(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
@@ -202,7 +202,7 @@ void createInitialResult()
         // MSLS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         // ILS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations);
         // LNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, true);
-        HAE(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 1480000, iterations, true);
+        // HAE(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, false);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)

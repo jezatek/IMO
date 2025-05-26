@@ -77,6 +77,9 @@ struct Solution
                 }
             }
         }
+        // cout << (newt1.size() + newt2.size()) / 200.0 << endl;
+        // int a;
+        // cin >> a;
         two_regret_heuristics(distance_matrix, newt1, newt2, false);
         tab1 = newt1;
         tab2 = newt2;
@@ -93,19 +96,20 @@ float HAE(std::vector<std::vector<double>> &distance_matrix, std::vector<int> &i
     iterations = 0;
     auto start = chrono::steady_clock::now();
     set<Solution> solutions;
-    for (int i = 0; i < MAX_SIZE + 10; i++)
+    for (int i = 0; i < MAX_SIZE + 2; i++)
     {
         vector<int> idx1;
         vector<int> idx2;
-        two_regret_heuristics(distance_matrix, idx1, idx2);
+        randomRes(distance_matrix, idx1, idx2);
+        changeEdgeMemory(distance_matrix, idx1, idx2);
         Solution s(idx1, idx2, distance_matrix);
         solutions.insert(s);
     }
-
     while (solutions.size() > MAX_SIZE)
     {
         solutions.erase(--solutions.end());
     }
+    // cout << "il rozwiazan: " << solutions.size() << endl;
     while (chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now() - start).count() < time)
     {
         iterations++;
