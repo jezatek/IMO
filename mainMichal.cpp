@@ -15,6 +15,7 @@
 #include "lab3.h"
 #include "lab4.h"
 #include "lab5.h"
+#include "lab6.h"
 
 #define nrOfTrials 10
 using namespace std;
@@ -136,9 +137,10 @@ void createInitialResult()
         auto start = chrono::high_resolution_clock::now();
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
+        iterations = 0;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
         // randomRes(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
-        two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        // two_regret_heuristics(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, true);
         // changeEdgeMemory(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
@@ -148,7 +150,9 @@ void createInitialResult()
         // ILS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations);
         // LNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, true);
         // HAE(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, false);
+        paraLNS(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle, 14400000, iterations, true);
         int res = resultFromCycles(distance_matrix, indexes_of_first_cycle, indexes_of_second_cycle);
+        cout << "res:" << res << endl;
         sum += res;
         if (res < mini)
         {
@@ -191,9 +195,10 @@ void createInitialResult()
         auto start = chrono::high_resolution_clock::now();
         vector<int> indexes_of_first_cycle;
         vector<int> indexes_of_second_cycle;
+        iterations = 0;
         // Zmieniasz ponizsze na randomRes / two_regret_heuristics
         // randomRes(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
-        two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
+        // two_regret_heuristics(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         // changeWierzholek(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, false);
         // changeEdge(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, true);
         // changeEdgeMemory(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
@@ -203,6 +208,7 @@ void createInitialResult()
         // ILS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations);
         // LNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, true);
         // HAE(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, false);
+        paraLNS(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle, 14800000, iterations, true);
         int res = resultFromCycles(distance_matrix2, indexes_of_first_cycle, indexes_of_second_cycle);
         sum += res;
         if (res < mini)
@@ -233,7 +239,13 @@ void createInitialResult()
 }
 int main()
 {
-    srand(3);
-    createInitialResult();
+    // srand(3);
+    // createInitialResult();
+    vector<Node> nodes = read_coordinates_from_file("kroA200.tsp");
+    vector<vector<double>> distance_matrix = create_distance_matrix(nodes);
+    vector<Node> nodes2 = read_coordinates_from_file("kroB200.tsp");
+    vector<vector<double>> distance_matrix2 = create_distance_matrix(nodes2);
+    generateStats(distance_matrix, "trw.txt", "tComp1.txt");
+    generateStats(distance_matrix2, "trw2.txt", "tComp2.txt");
     return 0;
 }

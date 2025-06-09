@@ -61,6 +61,7 @@ struct Solution
                 int d2 = s2.tab2[(j + 1) % n];
 
                 if ((a1 == c1 && b1 == d1) || (a1 == c2 && b1 == d2))
+                // if ((a1 == c1 && b1 == d1) || (a1 == c2 && b1 == d2) || (a1 == d1 && b1 == c1) || (a1 == d2 && b1 == c2))
                 {
                     if (newt1.empty() || newt1.back() != a1)
                         newt1.push_back(a1);
@@ -69,6 +70,7 @@ struct Solution
                 }
 
                 if ((a2 == c1 && b2 == d1) || (a2 == c2 && b2 == d2))
+                // if ((a2 == c1 && b2 == d1) || (a2 == c2 && b2 == d2) || (a2 == d1 && b2 == c1) || (a2 == d2 && b2 == c2))
                 {
                     if (newt2.empty() || newt2.back() != a2)
                         newt2.push_back(a2);
@@ -96,7 +98,7 @@ float HAE(std::vector<std::vector<double>> &distance_matrix, std::vector<int> &i
     iterations = 0;
     auto start = chrono::steady_clock::now();
     set<Solution> solutions;
-    for (int i = 0; i < MAX_SIZE + 2; i++)
+    for (int i = 0; i < MAX_SIZE; i++)
     {
         vector<int> idx1;
         vector<int> idx2;

@@ -98,7 +98,9 @@ int get_index_closest_to_pair(vector<vector<double>> &distance_matrix, vector<bo
     }
     return closest_node_index;
 }
-
+/// @brief Calculates result from given solution
+/// @param distance_matrix n*n array of distances between points
+/// @return returns calulated sum of lenghs of both cycles
 float resultFromCycles(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle)
 {
     int cs = indexes_of_first_cycle.size();
@@ -274,8 +276,9 @@ double lowestCost(vector<vector<double>> &distance_matrix, vector<int> &indexes_
 
 /// @brief Generates 2-regret result
 /// @param distance_matrix n*n array of distances between points
-/// @param indexes_of_first_cycle Result first cycle -> needs to be empty at start
-/// @param indexes_of_second_cycle Result second cycle -> needs to be empty at start
+/// @param indexes_of_first_cycle Result first cycle
+/// @param indexes_of_second_cycle Result second cycle
+/// @param begin If false -> "fills" indexes (should have some values), if true creates results (cycles need to be empty at start)
 void two_regret_heuristics(vector<vector<double>> &distance_matrix, vector<int> &indexes_of_first_cycle, vector<int> &indexes_of_second_cycle, bool begin = true)
 {
     // bool DEBBUG = false;
